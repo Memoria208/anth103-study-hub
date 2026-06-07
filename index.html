@@ -439,6 +439,8 @@ footer {
     <p id="completeDetail"></p>
     <button class="btn-restart" onclick="restartDeck()">Study again</button>
     &nbsp;
+    <button class="btn-restart" id="studyAgainBtn" onclick="restartStillLearning()" style="display:none;">Study still learning</button>
+    &nbsp;
     <button class="btn-restart" onclick="goHome()">Choose chapters</button>
   </div>
 </div>
@@ -773,12 +775,26 @@ function showComplete() {
   document.getElementById("cardScene").style.display = "none";
   document.getElementById("actions").style.display = "none";
   document.getElementById("complete").style.display = "block";
+  const stillCount = again.size;
   document.getElementById("completeDetail").textContent =
-    "You marked " + known.size + " of " + filteredDeck.length + " cards as 'know it'. Keep reviewing the rest!";
+    "You marked " + known.size + " of " + filteredDeck.length + " cards as 'know it'."
+    + (stillCount > 0 ? " " + stillCount + " card" + (stillCount !== 1 ? "s" : "") + " still need work." : " Great job!");
+  document.getElementById("studyAgainBtn").style.display = stillCount > 0 ? "inline-block" : "none";
   updateStats();
 }
 
 function restartDeck() {
+  known.clear(); again.clear(); idx = 0; flipped = false;
+  shuffle(filteredDeck);
+  document.getElementById("complete").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("actions").style.display = "none";
+  render();
+}
+
+function restartStillLearning() {
+  const stillTerms = new Set(again);
+  filteredDeck = filteredDeck.filter(c => stillTerms.has(c.term));
   known.clear(); again.clear(); idx = 0; flipped = false;
   shuffle(filteredDeck);
   document.getElementById("complete").style.display = "none";
