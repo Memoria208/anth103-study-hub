@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANTH 103 — Study Hub</title>
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --border: #2a2a45;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --accent: #3355cc;
+    --accent-light: #1a1f3a;
+    --accent-hover: #4466ee;
+    --tag-bg: #1e2248;
+    --tag-text: #8899ee;
+    --success: #4db87a;
+    --success-bg: #0d2a1a;
+    --sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+  }
+
+  header p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 1.1rem;
+  }
+
+  .flashcard-link {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    text-decoration: none;
+    padding: 0.45rem 1.1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+
+  .flashcard-link:hover { background: rgba(255,255,255,0.25); }
+
+  /* Layout */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem;
+  }
+
+  /* Visual Aids */
+  .visual-aids {
+    margin-bottom: 2rem;
+  }
+
+  .section-heading {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .visual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .visual-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .visual-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(61,90,153,0.1);
+  }
+
+  .visual-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .visual-info strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  .visual-info span {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* Chapter sections */
+  .chapter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .chapter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+  }
+
+  .chapter-header:hover { background: var(--accent-light); }
+
+  .chapter-header.open { border-bottom-color: var(--border); }
+
+  .chapter-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .chapter-tag {
+    background: var(--tag-bg);
+    color: var(--tag-text);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .chapter-title {
+    font-size: 0.97rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .chapter-meta {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .note-count {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  .chevron {
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+
+  .chevron.open { transform: rotate(180deg); }
+
+  /* Chapter body */
+  .chapter-body {
+    display: none;
+    padding: 1.25rem;
+  }
+
+  .chapter-body.open { display: block; }
+
+  /* Notes list */
+  .notes-list {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .note-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 0.85rem 1rem;
+  }
+
+  .note-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .note-author {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .note-date {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1;
+  }
+
+  .delete-btn:hover {
+    background: #fde8e8;
+    color: #c0392b;
+  }
+
+  .note-text {
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+    border: 1px dashed var(--border);
+    border-radius: 7px;
+    margin-bottom: 1.25rem;
+  }
+
+  .loading-state {
+    text-align: center;
+    padding: 1rem;
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+
+  /* Add note form */
+  .add-note-form {
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 0.65rem;
+  }
+
+  .form-row input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-family: var(--sans);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-row input:focus { border-color: var(--accent); }
+
+  textarea.note-input {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-family: var(--sans);
+    background: var(--surface);
+    color: var(--text);
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  textarea.note-input:focus { border-color: var(--accent); }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .submit-hint {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  button.post-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  button.post-btn:hover { background: var(--accent-hover); }
+  button.post-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .post-success {
+    font-size: 0.8rem;
+    color: var(--success);
+    background: var(--success-bg);
+    border-radius: 5px;
+    padding: 4px 10px;
+    display: none;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 540px) {
+    header h1 { font-size: 1.4rem; }
+    .form-row { flex-direction: column; }
+    .submit-row { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ANTH 103 — Study Hub</h1>
+  <p>notes, organized by module</p>
+  <div style="display:flex; gap:0.6rem; justify-content:center; flex-wrap:wrap;">
+    <a class="flashcard-link" href="anth103_flashcards.html">↗ Flashcard App</a>
+    <a class="flashcard-link" href="anth103_study_guides.html">↗ Study Guides</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- Quick Links -->
+  <div class="visual-aids">
+    <div class="section-heading">Quick Links</div>
+    <div class="visual-grid">
+      <a class="visual-card" href="anth103_flashcards.html">
+        <div class="visual-icon">🃏</div>
+        <div class="visual-info">
+          <strong>Flashcard App</strong>
+          <span>Study terms by chapter — all modules</span>
+        </div>
+      </a>
+      <a class="visual-card" href="anth103_study_guides.html">
+        <div class="visual-icon">📋</div>
+        <div class="visual-info">
+          <strong>Study Guides</strong>
+          <span>Q&amp;A guides organized by module</span>
+        </div>
+      </a>
+      <a class="visual-card" href="https://cwi.instructure.com" target="_blank">
+        <div class="visual-icon">🎓</div>
+        <div class="visual-info">
+          <strong>Canvas</strong>
+          <span>Assignments, submissions &amp; grades</span>
+        </div>
+      </a>
+      <a class="visual-card" href="Module4_Ch7_StudyGuide.md" target="_blank">
+        <div class="visual-icon">📄</div>
+        <div class="visual-info">
+          <strong>Ch. 7 Study Guide</strong>
+          <span>Typology, space-time systematics &amp; point types — Mod. 4</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Modules will be rendered here by JS -->
+  <div id="chapters-container"></div>
+
+</main>
+
+<footer>
+  ANTH 103 · Introduction to Archaeology · CWI Summer 2026
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://gkluvggtgbsoouapufym.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrbHV2Z2d0Z2Jzb291YXB1ZnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzMwOTAsImV4cCI6MjA5NjM0OTA5MH0.Abb_-qg5on4C5-2IyQAJAdOkDZMD5kjwzllnVQwd75M";
+
+  const CHAPTERS = [
+    { id: "mod1", label: "Module 1", title: "History & Structure of Archaeology",                              due: "Due Jun 7"  },
+    { id: "mod2", label: "Module 2", title: "Doing Fieldwork",                                                 due: "Due Jun 14" },
+    { id: "mod3", label: "Module 3", title: "Geoarchaeology, Site Formation & Chronologies",                  due: "Due Jun 21" },
+    { id: "mod4", label: "Module 4", title: "Dimensions of Archaeology; Taphonomy & Ethnoarchaeology",        due: "Due Jun 28" },
+    { id: "mod5", label: "Module 5", title: "People, Plants & Animals; Bioarchaeology; Social Systems",       due: "Due Jul 5"  },
+    { id: "mod6", label: "Module 6", title: "Archaeology of the Mind; World Prehistory; Historical Arch.",    due: "Due Jul 12" },
+    { id: "mod7", label: "Module 7", title: "Caring for Cultural Heritage; Archaeology's Future",             due: "Due Jul 25" },
+  ];
+
+  async function sbFetch(path, options = {}) {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": options.prefer || "",
+      },
+      ...options,
+    });
+    if (!res.ok) { const err = await res.text(); throw new Error(err); }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  // ── Render modules ──────────────────────────────────────
+  const container = document.getElementById("chapters-container");
+
+  CHAPTERS.forEach(ch => {
+    const section = document.createElement("div");
+    section.className = "chapter";
+    section.innerHTML = `
+      <div class="chapter-header" data-id="${ch.id}">
+        <div class="chapter-label">
+          <span class="chapter-tag">${ch.label}</span>
+          <span class="chapter-title">${ch.title}</span>
+        </div>
+        <div class="chapter-meta">
+          <span class="note-count" id="count-${ch.id}">0 notes</span>
+          <span style="font-size:0.8rem;color:var(--muted)">${ch.due}</span>
+          <span class="chevron" id="chev-${ch.id}">▼</span>
+        </div>
+      </div>
+      <div class="chapter-body" id="body-${ch.id}">
+        <div class="notes-list" id="notes-${ch.id}">
+          <div class="loading-state">Loading notes…</div>
+        </div>
+        <div class="add-note-form">
+          <div class="form-row">
+            <input type="text" id="name-${ch.id}" placeholder="Your name (optional)" maxlength="40"/>
+          </div>
+          <textarea class="note-input" id="text-${ch.id}" placeholder="Add a study note, mnemonic, key concept, or tip for this module…" maxlength="1000"></textarea>
+          <div class="submit-row">
+            <span class="submit-hint">Keep it helpful — no spoilers for quizzes 😄</span>
+            <div style="display:flex;align-items:center;gap:0.75rem">
+              <span class="post-success" id="success-${ch.id}">✓ Posted!</span>
+              <button class="post-btn" id="btn-${ch.id}" data-chapter="${ch.id}">Post note</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(section);
+
+    // Toggle open/close
+    section.querySelector(".chapter-header").addEventListener("click", () => {
+      const body = document.getElementById(`body-${ch.id}`);
+      const header = section.querySelector(".chapter-header");
+      const chev = document.getElementById(`chev-${ch.id}`);
+      const isOpen = body.classList.contains("open");
+      body.classList.toggle("open", !isOpen);
+      header.classList.toggle("open", !isOpen);
+      chev.classList.toggle("open", !isOpen);
+      if (!isOpen) loadNotes(ch.id);
+    });
+
+    // Post button
+    document.getElementById(`btn-${ch.id}`).addEventListener("click", () => postNote(ch.id));
+  });
+
+  // ── Load notes from Supabase ─────────────────────────────
+  async function loadNotes(moduleId) {
+    const listEl  = document.getElementById(`notes-${moduleId}`);
+    const countEl = document.getElementById(`count-${moduleId}`);
+
+    listEl.innerHTML = `<div class="loading-state">Loading…</div>`;
+
+    try {
+      const rows = await sbFetch(`anth103_notes?module=eq.${moduleId}&order=created_at.desc`);
+
+      countEl.textContent = `${rows.length} note${rows.length !== 1 ? "s" : ""}`;
+
+      if (rows.length === 0) {
+        listEl.innerHTML = `<div class="empty-state">No notes yet — be the first to add one!</div>`;
+        return;
+      }
+
+      listEl.innerHTML = "";
+      rows.forEach(n => {
+        const card = document.createElement("div");
+        card.className = "note-card";
+        card.innerHTML = `
+          <div class="note-meta">
+            <span class="note-author">${escHtml(n.author || "Anonymous")}</span>
+            <div style="display:flex;align-items:center;gap:0.5rem">
+              <span class="note-date">${formatDate(n.created_at)}</span>
+              <button class="delete-btn" data-id="${n.id}" data-chapter="${moduleId}">✕ delete</button>
+            </div>
+          </div>
+          <div class="note-text">${escHtml(n.text)}</div>
+        `;
+        listEl.appendChild(card);
+        card.querySelector(".delete-btn").addEventListener("click", () => deleteNote(n.id, moduleId));
+      });
+
+    } catch (err) {
+      listEl.innerHTML = `<div class="empty-state">Could not load notes. Check your Supabase setup.</div>`;
+      console.error(err);
+    }
+  }
+
+  // ── Post a note ──────────────────────────────────────────
+  async function postNote(moduleId) {
+    const nameEl = document.getElementById(`name-${moduleId}`);
+    const textEl = document.getElementById(`text-${moduleId}`);
+    const btn    = document.getElementById(`btn-${moduleId}`);
+    const ok     = document.getElementById(`success-${moduleId}`);
+
+    const text = textEl.value.trim();
+    if (!text) { textEl.focus(); return; }
+
+    btn.disabled = true;
+    btn.textContent = "Posting…";
+
+    try {
+      await sbFetch("anth103_notes", {
+        method: "POST",
+        prefer: "return=representation",
+        body: JSON.stringify({
+          module: moduleId,
+          author: nameEl.value.trim() || "Anonymous",
+          text,
+        }),
+      });
+
+      textEl.value = "";
+      nameEl.value = "";
+      ok.style.display = "inline-block";
+      setTimeout(() => { ok.style.display = "none"; }, 3000);
+
+      await loadNotes(moduleId);
+
+    } catch (err) {
+      alert("Could not post note. Check your Supabase config and table setup.");
+      console.error(err);
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Post note";
+  }
+
+  // ── Delete a note ────────────────────────────────────────
+  async function deleteNote(noteId, moduleId) {
+    if (!confirm("Are you sure you want to delete this note?")) return;
+    if (!confirm("This is permanent and cannot be undone. Delete anyway?")) return;
+    try {
+      await sbFetch(`anth103_notes?id=eq.${noteId}`, { method: "DELETE" });
+      await loadNotes(moduleId);
+    } catch (err) {
+      alert("Could not delete note.");
+      console.error(err);
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────────────
+  function escHtml(str) {
+    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function formatDate(ts) {
+    if (!ts) return "";
+    const d = new Date(ts);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  }
+</script>
+
+</body>
+</html>

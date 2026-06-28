@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANTH 103 Flashcards — Introduction to Archaeology</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* PSYC 101 palette — dark navy, blue accent (matches Study Hub & Study Guides) */
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --surface2: #232344;
+  --border: #2a2a45;
+  --border2: #3a3a5c;
+  --text: #e8e8f0;
+  --text2: #8888aa;
+  --text3: #6c6c8a;
+  --green: #4ec79a;
+  --green-bg: #123a30;
+  --red: #e98a6b;
+  --red-bg: #3a1c12;
+  --accent: #3355cc;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+}
+
+.wrap { max-width: 660px; margin: 0 auto; }
+
+/* ── HOME SCREEN ── */
+#homeScreen { display: block; }
+#studyScreen { display: none; }
+
+.home-header { margin-bottom: 2rem; }
+.home-header h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+.home-header p { font-size: 14px; color: var(--text2); }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+
+.chapter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 2rem;
+}
+
+.chapter-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.chapter-card:hover { border-color: var(--border2); background: var(--surface2); }
+.chapter-card.selected { border: 2px solid var(--accent); background: var(--green-bg); }
+
+.chapter-card .ch-num {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 4px;
+}
+
+.chapter-card .ch-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.chapter-card .ch-count {
+  font-size: 12px;
+  color: var(--text3);
+}
+
+.chapter-card.coming-soon {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.multi-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.btn-outline {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.15s;
+}
+.btn-outline:hover { background: var(--surface2); color: var(--text); }
+
+.btn-start {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: opacity 0.15s;
+  margin-bottom: 2rem;
+}
+.btn-start:disabled { opacity: 0.35; cursor: default; }
+.btn-start:not(:disabled):hover { opacity: 0.88; }
+
+/* ── STUDY SCREEN ── */
+.study-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.btn-back {
+  border: 0.5px solid var(--border2);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text2);
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 18px;
+  font-family: var(--font);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.btn-back:hover { background: var(--surface2); }
+
+.study-title { font-size: 16px; font-weight: 500; color: var(--text); }
+.study-subtitle { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* filter chips */
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.chip {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border2);
+  font-size: 12px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+.chip.active { background: var(--surface2); color: var(--text); border-color: var(--border2); font-weight: 500; }
+
+/* stats */
+.stats { display: flex; gap: 12px; margin-bottom: 1rem; }
+.stat { background: var(--surface2); border-radius: var(--radius-md); padding: 10px 14px; flex: 1; text-align: center; }
+.stat-num { font-size: 20px; font-weight: 500; color: var(--text); }
+.stat-num.green { color: var(--green); }
+.stat-num.red { color: var(--red); }
+.stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.progress-wrap { background: var(--surface2); border-radius: 999px; height: 6px; margin-bottom: 1.25rem; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width 0.4s ease; width: 0%; }
+
+/* flashcard */
+.card-scene {
+  perspective: 1000px;
+  height: 240px;
+  margin-bottom: 1.25rem;
+  cursor: pointer;
+}
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.card-scene.flipped .card-inner { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.card-front { background: var(--surface); }
+.card-back { background: var(--surface2); transform: rotateY(180deg); }
+.card-badge {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+.card-term { font-size: 22px; font-weight: 500; color: var(--text); line-height: 1.35; }
+.card-def { font-size: 14px; color: var(--text2); line-height: 1.7; }
+.card-hint { font-size: 12px; color: var(--text3); margin-top: 1.25rem; }
+
+/* actions */
+.actions { display: flex; gap: 10px; margin-bottom: 1.25rem; }
+.btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--border2);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn:hover { background: var(--surface2); }
+.btn:active { transform: scale(0.98); }
+.btn-know { border-color: var(--green); color: var(--green); }
+.btn-know:hover { background: var(--green-bg); }
+.btn-again { border-color: var(--red); color: var(--red); }
+.btn-again:hover { background: var(--red-bg); }
+
+/* nav */
+.nav { display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 2rem; }
+.nav-btn {
+  border: 0.5px solid var(--border2);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text2);
+  width: 36px; height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-family: var(--font);
+  transition: background 0.15s;
+}
+.nav-btn:hover { background: var(--surface2); }
+.nav-counter { font-size: 14px; color: var(--text2); min-width: 80px; text-align: center; }
+
+/* complete */
+.complete { text-align: center; padding: 2.5rem 1rem; display: none; }
+.complete .emoji { font-size: 40px; margin-bottom: 12px; }
+.complete h2 { font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+.complete p { font-size: 14px; color: var(--text2); margin-bottom: 1.5rem; }
+.btn-restart {
+  padding: 10px 28px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--border2);
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.btn-restart:hover { background: var(--surface2); }
+
+footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text3);
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 0.5px solid var(--border);
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HOME SCREEN -->
+<div id="homeScreen">
+  <div class="home-header">
+    <h1>ANTH 103 Flashcards</h1>
+    <p>Introduction to Archaeology &middot; Cengage Learning, 2017 ed.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:0.75rem;">
+      <a href="index.html" style="display:inline-block;background:rgba(255,255,255,0.08);border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;padding:5px 14px;border-radius:6px;font-size:13px;">← Study Hub</a>
+      <a href="anth103_study_guides.html" style="display:inline-block;background:rgba(255,255,255,0.08);border:0.5px solid var(--border2);color:var(--text2);text-decoration:none;padding:5px 14px;border-radius:6px;font-size:13px;">↗ Study Guides</a>
+    </div>
+  </div>
+
+  <div class="section-label">Select chapters to study</div>
+  <div class="chapter-grid" id="chapterGrid"></div>
+
+  <div class="multi-controls">
+    <button class="btn-outline" onclick="selectAll()">Select all available</button>
+    <button class="btn-outline" onclick="clearAll()">Clear selection</button>
+    <button class="btn-outline" onclick="openCreateModal()">+ Create card</button>
+  </div>
+
+  <button class="btn-start" id="startBtn" onclick="startStudy()" disabled>
+    Start flashcards
+  </button>
+
+  <footer>
+    Built from ANTH 103 lecture slides &middot; Cengage Learning, 2017 &middot; For personal study use
+  </footer>
+
+  <!-- CUSTOM CARDS LIST -->
+  <div id="customCardsSection" style="display:none; margin-top:1.5rem;">
+    <div class="section-label" style="margin-bottom:10px;">Your custom cards</div>
+    <div id="customCardsList"></div>
+  </div>
+</div>
+
+<!-- CREATE CARD MODAL -->
+<div id="createModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:100; display:none; align-items:center; justify-content:center; padding:1rem;">
+  <div style="background:var(--surface); border-radius:var(--radius-lg); padding:1.5rem; width:100%; max-width:480px; border:0.5px solid var(--border2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+      <div style="font-size:16px; font-weight:500;">Create a new card</div>
+      <button onclick="closeCreateModal()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text2); line-height:1;">&times;</button>
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <div class="section-label" style="margin-bottom:6px;">Chapter</div>
+      <select id="createChapter" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); font-family:var(--font); font-size:13px;"></select>
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <div class="section-label" style="margin-bottom:6px;">Tag / category</div>
+      <input id="createTag" type="text" placeholder="e.g. Definition, Key Concept…" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); font-family:var(--font); font-size:13px;">
+    </div>
+    <div style="margin-bottom:0.75rem;">
+      <div class="section-label" style="margin-bottom:6px;">Term (front)</div>
+      <input id="createTerm" type="text" placeholder="Term or question" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); font-family:var(--font); font-size:13px;">
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <div class="section-label" style="margin-bottom:6px;">Definition (back)</div>
+      <textarea id="createDef" rows="3" placeholder="Definition or answer" style="width:100%; padding:8px 10px; border-radius:var(--radius-md); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); font-family:var(--font); font-size:13px; resize:vertical;"></textarea>
+    </div>
+    <div id="createError" style="color:var(--red); font-size:12px; margin-bottom:0.75rem; display:none;"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-outline" onclick="closeCreateModal()" style="flex:1;">Cancel</button>
+      <button onclick="saveNewCard()" style="flex:2; padding:9px; border-radius:var(--radius-md); border:none; background:var(--accent); color:#fff; font-size:14px; font-weight:500; cursor:pointer; font-family:var(--font);">Add card</button>
+    </div>
+  </div>
+</div>
+<div id="studyScreen">
+  <div class="study-topbar">
+    <button class="btn-back" onclick="goHome()" title="Back to chapters">&#8592;</button>
+    <div>
+      <div class="study-title" id="studyTitle"></div>
+      <div class="study-subtitle" id="studySubtitle"></div>
+    </div>
+  </div>
+
+  <div class="filter-row" id="filterRow"></div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
+    <div class="stat"><div class="stat-num green" id="statKnow">0</div><div class="stat-label">Know it</div></div>
+    <div class="stat"><div class="stat-num red" id="statAgain">0</div><div class="stat-label">Still learning</div></div>
+  </div>
+
+  <div class="progress-wrap"><div class="progress-fill" id="progressBar"></div></div>
+
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner">
+      <div class="card-face card-front">
+        <div class="card-badge" id="cardBadge"></div>
+        <div class="card-term" id="cardTerm"></div>
+        <div class="card-hint">tap to reveal definition</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-badge" id="cardChapter"></div>
+        <div class="card-def" id="cardDef"></div>
+        <div class="card-hint">tap to flip back</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions" id="actions" style="display:none;">
+    <button class="btn btn-again" onclick="markCard(false)">&#8635; Still learning</button>
+    <button class="btn btn-know" onclick="markCard(true)">&#10003; Know it</button>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" onclick="prevCard()">&#8592;</button>
+    <div class="nav-counter" id="navCounter">1 / 0</div>
+    <button class="nav-btn" onclick="nextCard()">&#8594;</button>
+  </div>
+
+  <div class="complete" id="complete">
+    <div class="emoji">&#127881;</div>
+    <h2>Deck complete!</h2>
+    <p id="completeDetail"></p>
+    <button class="btn-restart" onclick="restartDeck()">Study again</button>
+    &nbsp;
+    <button class="btn-restart" id="studyAgainBtn" onclick="restartStillLearning()" style="display:none;">Study still learning</button>
+    &nbsp;
+    <button class="btn-restart" onclick="goHome()">Choose chapters</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA
+   Add new chapters below as the semester progresses.
+   Each chapter: { id, num, title, cards[] }
+   Each card: { term, def, tag }
+   coming: true = grayed out placeholder
+════════════════════════════════════════════ */
+const CHAPTERS = [
+  {
+    id: "ch1",
+    num: "Chapter 1",
+    title: "Meet Some Real Archaeologists",
+    cards: [
+      { term: "Archaeology (definition)", def: "The study of the past through the systematic recovery and analysis of material remains.", tag: "Definition" },
+      { term: "Nabonidus", def: "The last king of the neo-Babylonian Empire; considered the first archaeologist — he relied on physical residues of antiquity to answer questions about the past, rather than tradition, legend, and myth.", tag: "Key figure" },
+      { term: "Deep Time", def: "The recognition that life was far more ancient than recognized by biblical scholars and that human culture had evolved over time.", tag: "Key concept" },
+      { term: "James Ussher (1581–1656)", def: "Archbishop who calculated the Earth to be no more than about 6,000 years old; claimed Creation occurred on Saturday, October 22, 4004 BC.", tag: "Key figure" },
+      { term: "Jacques Boucher de Perthes (1778–1868)", def: "French scholar whose discovery of crude stone tools and bones of long-extinct mammals challenged biblical chronology, proving the existence of very ancient humans.", tag: "Key figure" },
+      { term: "Hugh Falconer", def: "British paleontologist who used evidence in France and southern England to confirm de Perthes' conclusions about ancient humans.", tag: "Key figure" },
+      { term: "Charles Lyell", def: "Geologist who published 'The Geological Evidences of the Antiquity of Man' (1863), arguing that humans lived with now-extinct animals in the far distant past.", tag: "Key figure" },
+      { term: "Charles Darwin", def: "Published 'On the Origin of Species' (1859), suggesting the process by which modern people could have arisen from ancient primate ancestors; his work established the concept of Deep Time.", tag: "Key figure" },
+      { term: "Petrarch (1304–1374)", def: "Italian intellectual who rediscovered the past as the basis for moral philosophy, studying classical civilizations.", tag: "Key figure" },
+      { term: "Ciriaco de'Pizzicolli (1391–1455)", def: "Humanist scholar who 'restored the dead to life' by studying ancient monuments; an early antiquarian.", tag: "Key figure" },
+      { term: "BC / BCE", def: "BC = 'Before Christ.' BCE = 'Before Common Era' — same dates as BC but avoids religious connotation. E.g., 3200 BC = 3200 BCE.", tag: "Time notation" },
+      { term: "AD / CE", def: "AD = anno Domini ('in the year of the Lord'), counted from the year after the birth of Christ. CE = 'Common Era' — same dates as AD without religious privilege. Earliest date is AD 1 (no AD 0).", tag: "Time notation" },
+      { term: "BP (Before Present)", def: "A dating convention where AD 1950 is arbitrarily selected as the zero point; used especially in radiocarbon dating.", tag: "Time notation" },
+      { term: "Classical Archaeology", def: "The branch of archaeology that studies the 'classical studies,' particularly ancient Greece, Rome, and the Near East.", tag: "Definition" },
+      { term: "Society for Antiquaries", def: "Dissolved in 1614, reformed in 1707; the first of many British scholarly societies interested in the relevance of the past to the present, focused on mapping, recording, and preserving national treasures.", tag: "History" },
+      { term: "Antiquarian", def: "Someone who studied antiquities (ancient objects) largely for the sake of the objects themselves, not to understand the people or culture that produced them.", tag: "Definition" },
+      { term: "Giovanni Battista Belzoni", def: "A circus strongman with hydraulic engineering knowledge who traveled to Egypt in 1815. Used destructive methods but took notes and illustrations — his interest in what ancient 'things' had to tell marks the beginning of archaeological science.", tag: "Key figure" },
+      { term: "J.J.A. Worsaae (1821–1885)", def: "Danish native considered the first professional archaeologist. Published 'Primeval Antiquities of Denmark' (1843). Introduced inquiry-based excavation; documented middens and potsherds.", tag: "Key figure" },
+      { term: "Christian Thomsen (1788–1865)", def: "Worsaae's mentor who devised the typological scheme of Stone Age, Bronze Age, and Iron Age.", tag: "Key figure" },
+      { term: "Middens", def: "Refuse deposits resulting from human activities, generally consisting of sediment, discarded food, and debris. Documented by Worsaae.", tag: "Definition" },
+      { term: "Potsherds", def: "Fragments of pottery found at archaeological sites; used by Worsaae and later A.V. Kidder to study past cultures.", tag: "Definition" },
+      { term: "Alfred Vincent Kidder", def: "Founder of Anthropological Archaeology. Used potsherds to explain how ceramic decoration reveals cultural relationships among prehistoric groups; shifted archaeology's focus from things to people.", tag: "Key figure" },
+      { term: "Gertrude Caton-Thompson", def: "Pioneer who advanced archaeology intellectually; studied settlement patterns by excavating a village site in Egypt; conducted interdisciplinary work with a geologist in the Fayum Desert; established the importance of site stratigraphy.", tag: "Key figure" },
+      { term: "Stratigraphy", def: "A site's physical structure produced by the deposition of geological and/or cultural sediments into layers (strata), used to reveal age and original inhabitants.", tag: "Definition" },
+      { term: "H. Marie Wormington", def: "Female archaeologist who published 'Ancient Man in North America' (1939) and 'Prehistoric Indians of the Southwest' (1947). Took the name 'H. M. Wormington' to conceal her gender against professional discrimination.", tag: "Key figure" },
+      { term: "Lewis R. Binford", def: "Known as 'Archaeology's Angry Young Man'; recognized the need to address cultural evolution, ecology, social organization, and quantitative techniques. Founded the New Archaeology movement.", tag: "Key figure" },
+      { term: "New Archaeology / Processual Archaeology", def: "An approach that arose in the 1960s emphasizing the understanding of underlying cultural processes and the use of the scientific method. Associated with Lewis Binford.", tag: "Key concept" },
+      { term: "Culture History", def: "Explains differences or changes over time in artifact frequencies by positing the diffusion of ideas between neighboring cultures or the migration of peoples with different mental templates for artifact styles.", tag: "Key concept" },
+      { term: "Modern Archaeology Jobs", def: "Archaeologists work in museums, universities, federal agencies, and private cultural resource management (CRM) firms. All share a broad set of theories, approaches, and interests.", tag: "Careers" },
+      { term: "Archaeology's Future", def: "Characterized by increased public interest (National Parks, entertainment, university courses), increased ethical concerns, and recognition that systematic scientific study is susceptible to cultural biases.", tag: "Key concept" },
+    ]
+  },
+  {
+    id: "ch2",
+    num: "Chapter 2",
+    title: "The Structure of Archaeological Inquiry",
+    cards: [
+      { term: "Anthropology", def: "The study of all aspects of humankind — biological, cultural, and linguistic; extant and extinct — employing a holistic, comparative approach and the concept of culture.", tag: "Definition" },
+      { term: "Four Subfields of Anthropology", def: "1. Biological (physical) anthropology, 2. Cultural anthropology, 3. Linguistic anthropology, 4. Archaeology. The concept of culture unites all four.", tag: "Key concept" },
+      { term: "Biological Anthropology", def: "Views humans as biological organisms; also known as physical anthropology. Includes study of human evolution, human variation, and bioarchaeology.", tag: "Definition" },
+      { term: "Cultural Anthropology", def: "Emphasizes nonbiological aspects: the learned social, linguistic, technological, and familial behaviors of humans. Primary strategy = participant observation.", tag: "Definition" },
+      { term: "Linguistic Anthropology", def: "Focuses on human language: its diversity in grammar, syntax, and lexicon; its historical development; and its relation to a culture's perception of the world.", tag: "Definition" },
+      { term: "Participant Observation", def: "The primary strategy of cultural anthropology, in which data are gathered by questioning and observing people while the observer lives in their society.", tag: "Definition" },
+      { term: "Culture", def: "An integrated system of beliefs, traditions, and customs that govern or influence a person's behavior. Culture is learned, shared by members of a group, and based on the ability to think in terms of symbols.", tag: "Key concept" },
+      { term: "Three Properties of Culture", def: "1. Learned — from parents, peers, teachers (not inherited). 2. Shared — members share basic ideas about the world. 3. Symbolic — meanings condition behavior, which in turn affects the material traces of those behaviors.", tag: "Key concept" },
+      { term: "Ideational Perspective", def: "A research perspective that focuses on ideas, symbols, and mental structures as the primary driving forces in shaping human behavior.", tag: "Theory" },
+      { term: "Adaptive Perspective", def: "A research perspective that emphasizes technology, ecology, demography, and economics as the key factors defining human behavior.", tag: "Theory" },
+      { term: "Potlatch", def: "Among nineteenth-century Northwest Coast Native Americans, a ceremony involving the giving away or destruction of property in order to acquire prestige. The term comes from Chinook (a trade language) and means 'to give.'", tag: "Example" },
+      { term: "Trade Language", def: "A language that develops among speakers of different languages to permit economic exchanges. Example: Chinook on the Northwest Coast.", tag: "Definition" },
+      { term: "Science", def: "The search for answers through a process that is objective, systematic, logical, predictive, and public.", tag: "Definition" },
+      { term: "Five Properties of Science", def: "1. Empirical/objective (observable, measurable). 2. Systematic and explicit (reproducible). 3. Logical (data linked by demonstrated principles). 4. Explanatory and predictive (seeks causal theories). 5. Self-critical and public (understanding via testing, not proof).", tag: "Key concept" },
+      { term: "When Is a Question Scientific?", def: "A question is scientific when: (a) it is concerned with detectable properties of things, and (b) the result of observations designed to answer it cannot be predetermined by the biases of the observer.", tag: "Key concept" },
+      { term: "Hypothesis", def: "A proposition proposed as an explanation of some phenomena; a testable prediction derived from theory.", tag: "Definition" },
+      { term: "Six Steps of the Scientific Method", def: "1. Define a relevant problem. 2. Establish hypotheses. 3. Determine empirical implications of hypotheses. 4. Collect appropriate data. 5. Test hypothesis vs. expected implications. 6. Reject, revise, and/or retest as necessary.", tag: "Key concept" },
+      { term: "Inductive Reasoning", def: "Working from specific observations to more general hypotheses; building general principles up from data.", tag: "Definition" },
+      { term: "Deductive Reasoning", def: "Reasoning from theory to account for specific observational or experimental results; starting with a general theory and deriving specific predictions.", tag: "Definition" },
+      { term: "Testability", def: "The degree to which one's observations and experiments can be reproduced. A key requirement for scientific validity.", tag: "Definition" },
+      { term: "Theory", def: "An explanation for observed, empirical phenomena, seeking to explain the relationships between variables; an answer to a 'why' question.", tag: "Definition" },
+      { term: "Moundbuilder Myth", def: "A 19th-century belief that a mysterious lost race (not Native Americans) built the mounds of Ohio and Mississippi River valleys. Debunked by Cyrus Thomas, who objectively showed Native Americans built the mounds.", tag: "Example" },
+      { term: "Cyrus Thomas", def: "Archaeologist who objectively concluded there was no lost race of Moundbuilders — the mounds were built by Native Americans, not a separate superior race.", tag: "Key figure" },
+      { term: "Low-Level Theory", def: "The observations and interpretations that emerge from hands-on archaeological field and lab work. Begins with archaeological objects and generates data about those objects.", tag: "Theory" },
+      { term: "Data", def: "Relevant observations made on objects that then serve as the basis for study and discussion.", tag: "Definition" },
+      { term: "Rockshelter", def: "A common type of archaeological site consisting of a rock overhang deep enough to provide shelter but not deep enough to be called a cave. Example: Gatecliff Shelter, Nevada.", tag: "Definition" },
+      { term: "Ecofacts", def: "Plant or animal remains found at an archaeological site; provide environmental and subsistence data.", tag: "Definition" },
+      { term: "Feature", def: "Nonportable archaeological evidence such as fire pits, architectural elements, artifact clusters, garbage pits, and soil stains.", tag: "Definition" },
+      { term: "Middle-Level Theory", def: "Links archaeological observations with the human behavior or natural processes that produced them. Moves past the observable to reconstruct invisible past behaviors. Requires ethnoarchaeology, experimental archaeology, or taphonomy.", tag: "Theory" },
+      { term: "High-Level Theory", def: "Seeks to answer large 'why' questions about the human condition. Applied to inquiry about broad patterns in human history.", tag: "Theory" },
+      { term: "Paradigm", def: "An overarching framework, often unstated, for understanding a research problem. Shapes which questions are asked and how data are interpreted.", tag: "Definition" },
+      { term: "Processual Paradigm", def: "Explains social, economic, and cultural change as primarily the result of adaptation to material conditions; external factors (environment) take causal priority over ideational factors. Popular in archaeology from the 1960s–1970s.", tag: "Theory" },
+      { term: "General Systems Theory", def: "An effort to describe the properties by which all systems, including human societies, allegedly operate. Popular in processual archaeology of the late 1960s and 1970s.", tag: "Theory" },
+      { term: "Postprocessual Paradigm", def: "Focuses on humanistic approaches and rejects scientific objectivity; concerned with interpreting the past, not testing hypotheses. Sees knowledge as 'historically situated' and argues all archaeology is political.", tag: "Theory" },
+      { term: "Deconstruction", def: "Efforts to expose the assumptions behind the alleged objective and systematic search for knowledge. Key concept within the postprocessual paradigm.", tag: "Definition" },
+      { term: "Processual-Plus Paradigm", def: "A middle-ground approach: material factors play critical roles in how human societies change, but universal laws are not sought; history is seen as the combined results of actions of individuals.", tag: "Theory" },
+      { term: "Three Levels of Archaeological Theory", def: "1. Low-level (field observations and data). 2. Middle-level (links data to human behavior). 3. High-level (broad 'why' questions and paradigms).", tag: "Key concept" },
+      { term: "How Archaeological Inquiry Works", def: "1. Hypotheses constructed to test competing propositions. 2. Hypothesis testing requires reconstructing the past. 3. The archaeological narrative goes public.", tag: "Key concept" },
+    ]
+  },
+  /* ── FUTURE CHAPTERS: paste new chapter objects here ── */
+  {
+  id: "ch3",
+  num: "Chapter 3",
+  title: "Doing Fieldwork: Surveying for Archaeological Sites",
+  cards: [
+    { term: "Archaeological Site", def: "Any place where material evidence exists about the human past. Usually, 'site' refers to a concentration of such evidence.", tag: "Definition" },
+    { term: "Projectile Points", def: "Material evidence such as arrowheads, dart points, or spear points found at archaeological sites.", tag: "Definition" },
+    { term: "Gumshoe Survey", def: "Traditional foot-survey approach to finding sites; luck and hard work are the major keys, though sites are also found through systematic survey.", tag: "Field Method" },
+    { term: "Seasonal Round", def: "Hunter-gatherers' pattern of movement between different places on the landscape, timed to the seasonal availability of food and other resources.", tag: "Key Concept" },
+    { term: "Settlement Pattern", def: "The distribution of archaeological sites across a region.", tag: "Definition" },
+    { term: "Settlement System", def: "Movements and activities reconstructed from a settlement pattern.", tag: "Definition" },
+    { term: "Fallacy of the 'Typical' Site", def: "No matter which site you choose to excavate, you will miss a great deal — no site is typical of the entire settlement system. The goal of survey is to document the full range of remains across a landscape.", tag: "Key Concept" },
+    { term: "Systematic Regional Survey", def: "A set of strategies for arriving at accurate descriptions of the range of archaeological material across a landscape.", tag: "Field Method" },
+    { term: "Statistical Population", def: "A set of counts, measurements, or characteristics about which relevant inquiries are to be made. Scientists use this term differently from its ordinary meaning.", tag: "Definition" },
+    { term: "Sample Universe", def: "The region that contains the statistical population and that will be sampled. Its size and shape are determined by the research question and practical considerations.", tag: "Definition" },
+    { term: "Sample Fraction", def: "The percentage of the sample universe that is surveyed. Areas with variability in archaeological remains require larger sample fractions than areas of low variability.", tag: "Definition" },
+    { term: "Random Sample", def: "A sample drawn from a statistical population such that every member of the population has an equal chance of being included.", tag: "Definition" },
+    { term: "Stratified Random Sample", def: "A survey universe divided into several sub-universes that are then sampled at potentially different sample fractions.", tag: "Field Method" },
+    { term: "Sample Units", def: "Survey units of a standard size and shape, determined by the research question and practical considerations, used to obtain the sample.", tag: "Definition" },
+    { term: "UTM (Universal Transverse Mercator)", def: "A grid system in which north and east coordinates provide a location anywhere in the world, precise to one meter.", tag: "Definition" },
+    { term: "Smithsonian Number", def: "A unique catalog number given to sites; consists of a number (state's alphabetical position), a letter abbreviation of the county, and the site's sequential number. Example: 26CH798 = Nevada, Churchill County, 798th site.", tag: "Field Method" },
+    { term: "Deflation", def: "A geologic process whereby fine sediment is blown away and larger items — including artifacts — are lowered onto a common surface and thus become recognizable as a site.", tag: "Definition" },
+    { term: "Non-Site Archaeology", def: "The analysis of archaeological patterns manifested on a scale of kilometers or hectares, rather than patterns within a single site.", tag: "Definition" },
+    { term: "Mano", def: "A fist-sized, round, flat, handheld stone used with a metate for grinding foods.", tag: "Artifact" },
+    { term: "Metate", def: "A large, flat stone used as a stationary surface upon which seeds, tubers, and nuts are ground with a mano.", tag: "Artifact" },
+    { term: "GPS (Global Positioning System)", def: "Handheld devices that use triangulation from radio waves received from satellites to determine your current position in terms of either the UTM grid or latitude and longitude; accurate to within 5 meters.", tag: "Technology" },
+    { term: "Plow Zone", def: "The upper portion of a soil profile that has been disturbed by repeated plowing or other agricultural activity.", tag: "Definition" },
+    { term: "Plow Zone Archaeology", def: "Walking through plowed fields after tilling (especially after a rain) because the plow turns up shallow buried remains.", tag: "Field Method" },
+    { term: "Shovel Testing", def: "A sample survey method used in regions where rapid soil buildup obscures buried archaeological remains; entails digging shallow, systematic pits across the survey unit.", tag: "Field Method" },
+    { term: "Remote Sensing", def: "The use of some form of electromagnetic energy to detect and measure characteristics of an archaeological target.", tag: "Definition" },
+    { term: "Proton Magnetometer", def: "A remote sensing technique that measures the strength of magnetism between the earth's magnetic core and a sensor controlled by the archaeologist; detects buried features.", tag: "Technology" },
+    { term: "Soil Resistivity Survey", def: "Monitors the electrical resistance of soils in a restricted volume near the surface of an archaeological site; changes in resistance can indicate buried walls or features.", tag: "Technology" },
+    { term: "Ground-Penetrating Radar (GPR)", def: "A remote sensing technique in which radar pulses directed into the ground reflect back to the surface when they strike features or interfaces, showing the presence and depth of possible buried features.", tag: "Technology" },
+    { term: "Benefits of Noninvasive Archaeology", def: "Expensive but becoming more affordable; can reduce overall project cost; some form can work anywhere except where there is background noise (high groundwater, considerable rock, or natural subsurface features).", tag: "Key Concept" },
+    { term: "Geographic Information System (GIS)", def: "A computer program for storing, retrieving, analyzing, and visually displaying cartographic data (geographically related information). Examples: ArcView, ArcInfo.", tag: "Technology" },
+    { term: "Georeferenced", def: "Data input to a GIS database using a common mapping reference (e.g., the UTM grid) so that all data can be spatially analyzed.", tag: "Definition" },
+    { term: "Landscape Archaeology", def: "The study of ancient human modification of the environment. 'Landscape' = the material manifestation of the relation between humans and their environments.", tag: "Definition" },
+    { term: "Thermal Infrared Multispectral Scanning (TIMS)", def: "Equipment mounted on aircraft or satellites that measures infrared thermal radiation from the ground; sensitive to differences as small as 0.1°C; can locate subsurface structures.", tag: "Technology" },
+    { term: "Chacoan Roads", def: "An extensive prehistoric road network centered on Chaco Canyon (New Mexico), discovered partly via TIMS remote sensing. Roads may have moved goods OR served ceremonial/symbolic functions.", tag: "Case Study" },
+    { term: "Wickiup", def: "A conical structure made of poles or logs laid against one another that served as a fall or winter home among prehistoric Shoshone and Paiute.", tag: "Definition" },
+  ]
+},
+  { id: "ch4", num: "Chapter 4", title: "Excavation", cards: [], coming: true },
+  { id: "ch5", num: "Chapter 5", title: "Dating the Past", cards: [], coming: true },
+  { id: "ch6", num: "Chapter 6", title: "Reconstructing Past Environments", cards: [], coming: true },
+  { id: "ch7", num: "Chapter 7", title: "Dimensions of Archaeology: Time, Space & Form", cards: [
+    { term: "Typology", def: "The classification of artifacts into types in order to identify meaningful patterns in form across time and space.", tag: "Definition" },
+    { term: "Space-time systematics", def: "The framework archaeologists use to organize artifact patterning into meaningful spatial and temporal categories.", tag: "Definition" },
+    { term: "Type (archaeological)", def: "An abstract category created by archaeologists to group similar artifacts; not an inherent property of the artifact itself.", tag: "Definition" },
+    { term: "Morphological type", def: "A purely descriptive artifact category based on observable physical attributes (shape, color, size) with no functional or chronological significance assumed.", tag: "Type of Type" },
+    { term: "Temporal type (time-marker)", def: "A morphological type that has been shown to occur within a specific, limited span of time, making it useful for dating sites and strata.", tag: "Type of Type" },
+    { term: "Functional type", def: "A category of artifacts grouped by how they were used (their function) rather than by shape or time period; often crosscuts morphological and temporal types.", tag: "Type of Type" },
+    { term: "Attribute", def: "A measurable or observable quality of an artifact (e.g., weight, notch position) used to define and compare types.", tag: "Definition" },
+    { term: "Two criteria for a good typology", def: "1) Minimize differences within each type and maximize differences between types. 2) Be objective and explicit enough that any trained observer can replicate the results.", tag: "Key Concept" },
+    { term: "Proximal shoulder angle (PSA)", def: "The angle between the bottom of a projectile point's notch and the point's long axis; used to distinguish expanding-stem from contracting-stem point types.", tag: "Gatecliff" },
+    { term: "Cottonwood Triangular", def: "A small (<1.0 g), unnotched projectile point type from the Great Basin; a temporal type dating to after 700 bp.", tag: "Point Types" },
+    { term: "Desert Side-notched", def: "A small (<1.0 g) side-notched projectile point type from the Great Basin; temporal type dating to after 700 bp.", tag: "Point Types" },
+    { term: "Rosegate series", def: "A medium-weight (1.0–2.5 g) notched projectile point type combining Rose Spring and Eastgate types; temporal type dating to 1500–700 bp.", tag: "Point Types" },
+    { term: "Elko Corner-notched", def: "A large (>2.5 g) projectile point with a PSA of 90°–150°; temporal type in the Great Basin dating to 3500–1500 bp.", tag: "Point Types" },
+    { term: "Gatecliff Contracting Stem", def: "A large (>2.5 g) projectile point with a PSA <90°; temporal type dating to 4500–1500 bp, first defined at Gatecliff Shelter, Nevada.", tag: "Point Types" },
+    { term: "Frison Effect", def: "The phenomenon where resharpening a stone tool changes its shape (and sometimes its size), which can alter how it is classified typologically.", tag: "Key Concept" },
+    { term: "Mousterian", def: "Stone tool assemblages associated with Neanderthal sites dating 130,000–35,000 years ago, classified by François Bordes into 63 types forming four major assemblage groupings.", tag: "Example" },
+    { term: "Archaeological culture", def: "A subdivision of a culture area whose material culture (pottery, architecture, etc.) distinguishes it from neighboring regions; e.g., Hohokam, Mogollon, Anasazi in the Southwest.", tag: "Space-Time" },
+    { term: "Period", def: "A broad slice of prehistoric time defined by gross changes in easily observable remains such as subsistence patterns or house forms.", tag: "Space-Time" },
+    { term: "Phase", def: "Archaeology's basic unit of space-time systematics: a block of time and space defined by one or more distinctive artifact types (temporal types) within a specific region.", tag: "Space-Time" },
+    { term: "Assemblage", def: "A collection of artifacts recovered from a specific unit of provenience (e.g., a stratum or a site).", tag: "Space-Time" },
+    { term: "Component", def: "A culturally homogeneous unit within a single site, grouping assemblages left by people who shared the same culture.", tag: "Space-Time" },
+    { term: "Willey & Phillips (1958)", def: "Authors of Method and Theory in American Archaeology, which established the foundational space-time systematics framework still used in North American archaeology.", tag: "Key Figure" },
+    { term: "Culture areas", def: "Large geographic regions defined in the 19th century primarily by what Native American peoples ate; the basis from which archaeological cultures were later subdivided.", tag: "Space-Time" },
+    { term: "Yankee Blade phase", def: "The latest central Great Basin phase (~700–150 bp), defined by ceramics and Desert Side-notched and Cottonwood Triangular points.", tag: "Example" },
+    { term: "Archaeology's greatest strength", def: "Its access to vast amounts of time (millions of years) and space (entire regions, continents), allowing study of long-term patterns that ethnology cannot capture.", tag: "Key Concept" },
+    { term: "Battleship curves", def: "The gradual rise and fall in frequency of an artifact type over time when plotted stratigraphically; characteristic of temporal types in a well-defined typology.", tag: "Key Concept" },
+    { term: "Conservation (artifact)", def: "The process of stabilizing and preserving recovered artifacts after excavation; ranges from simple washing to complex chemical treatments (e.g., Carbowax for wood, electrolysis for metal).", tag: "Lab Methods" },
+    { term: "Cataloging", def: "Recording every artifact's provenience and assigning it a number; for every week excavating, archaeologists typically spend 3–5 weeks cleaning, conserving, and cataloging.", tag: "Lab Methods" },
+    { term: "\"Classification — for what?\" (Rouse)", def: "Irving Rouse's reminder that typologies must be built with a specific research question in mind; there is no general all-purpose archaeological classification.", tag: "Key Concept" },
+  ]},
+  { id: "ch8", num: "Chapter 8", title: "Bioarchaeology & Ancient DNA", cards: [], coming: true },
+  { id: "ch9", num: "Chapter 9", title: "Archaeobotany & Zooarchaeology", cards: [], coming: true },
+  { id: "ch10", num: "Chapter 10", title: "Social & Political Organization", cards: [], coming: true },
+  { id: "ch11", num: "Chapter 11", title: "Trade & Exchange", cards: [], coming: true },
+  { id: "ch12", num: "Chapter 12", title: "Archaeology & Indigenous Peoples", cards: [], coming: true },
+];
+
+/* ═══════════════════════════════════════════
+   STATE
+════════════════════════════════════════════ */
+let selected = new Set();
+let deck = [];
+let filteredDeck = [];
+let idx = 0;
+let flipped = false;
+let known = new Set();
+let again = new Set();
+let activeTag = "All";
+
+/* ═══════════════════════════════════════════
+   HOME SCREEN
+════════════════════════════════════════════ */
+function buildHome() {
+  const grid = document.getElementById("chapterGrid");
+  grid.innerHTML = "";
+  CHAPTERS.forEach(ch => {
+    const div = document.createElement("div");
+    div.className = "chapter-card" + (ch.coming ? " coming-soon" : "") + (selected.has(ch.id) ? " selected" : "");
+    div.innerHTML = `
+      <div class="ch-num">${ch.num}</div>
+      <div class="ch-title">${ch.title}</div>
+      <div class="ch-count">${ch.coming ? "Coming soon" : ch.cards.length + " cards"}</div>
+    `;
+    if (!ch.coming) div.onclick = () => toggleChapter(ch.id, div);
+    grid.appendChild(div);
+  });
+  updateStartBtn();
+}
+
+function toggleChapter(id, el) {
+  if (selected.has(id)) { selected.delete(id); el.classList.remove("selected"); }
+  else { selected.add(id); el.classList.add("selected"); }
+  updateStartBtn();
+}
+
+function selectAll() {
+  CHAPTERS.filter(c => !c.coming).forEach(c => selected.add(c.id));
+  buildHome();
+}
+
+function clearAll() {
+  selected.clear();
+  buildHome();
+}
+
+function updateStartBtn() {
+  const btn = document.getElementById("startBtn");
+  const total = [...selected].reduce((n, id) => {
+    const ch = CHAPTERS.find(c => c.id === id);
+    return n + (ch ? ch.cards.length : 0);
+  }, 0);
+  btn.disabled = total === 0;
+  btn.textContent = total === 0
+    ? "Select at least one chapter"
+    : "Start flashcards (" + total + " cards)";
+}
+
+function startStudy() {
+  const chs = CHAPTERS.filter(c => selected.has(c.id));
+  deck = chs.flatMap(ch => ch.cards.map(card => ({ ...card, chapter: ch.num })));
+  shuffle(deck);
+
+  const isMulti = chs.length > 1;
+  document.getElementById("studyTitle").textContent = isMulti
+    ? chs.map(c => c.num).join(" + ")
+    : chs[0].num + " — " + chs[0].title;
+  document.getElementById("studySubtitle").textContent = deck.length + " cards";
+
+  known.clear(); again.clear();
+  idx = 0; flipped = false; activeTag = "All";
+
+  buildTagFilter(isMulti);
+  applyFilter();
+
+  document.getElementById("homeScreen").style.display = "none";
+  document.getElementById("studyScreen").style.display = "block";
+  document.getElementById("complete").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("actions").style.display = "none";
+}
+
+function goHome() {
+  document.getElementById("homeScreen").style.display = "block";
+  document.getElementById("studyScreen").style.display = "none";
+  buildHome();
+}
+
+/* ═══════════════════════════════════════════
+   STUDY SCREEN — TAG FILTER
+════════════════════════════════════════════ */
+function buildTagFilter(showChapterFilter) {
+  const row = document.getElementById("filterRow");
+  row.innerHTML = "";
+  const tags = ["All", ...Array.from(new Set(deck.map(c => c.tag)))];
+  if (showChapterFilter) {
+    const chTags = [...selected].map(id => CHAPTERS.find(c => c.id === id).num);
+    tags.push(...chTags);
+  }
+  tags.forEach(t => {
+    const btn = document.createElement("button");
+    btn.className = "chip" + (t === "All" ? " active" : "");
+    btn.textContent = t;
+    btn.onclick = () => {
+      activeTag = t;
+      document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      btn.classList.add("active");
+      applyFilter();
+    };
+    row.appendChild(btn);
+  });
+}
+
+function applyFilter() {
+  if (activeTag === "All") {
+    filteredDeck = [...deck];
+  } else if (activeTag.startsWith("Chapter")) {
+    filteredDeck = deck.filter(c => c.chapter === activeTag);
+  } else {
+    filteredDeck = deck.filter(c => c.tag === activeTag);
+  }
+  shuffle(filteredDeck);
+  known.clear(); again.clear();
+  idx = 0; flipped = false;
+  document.getElementById("complete").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("actions").style.display = "none";
+  render();
+}
+
+/* ═══════════════════════════════════════════
+   STUDY SCREEN — CARD LOGIC
+════════════════════════════════════════════ */
+function render() {
+  if (filteredDeck.length === 0) { showComplete(); return; }
+  if (idx >= filteredDeck.length) { showComplete(); return; }
+  const card = filteredDeck[idx];
+  document.getElementById("navCounter").textContent = (idx + 1) + " / " + filteredDeck.length;
+  document.getElementById("cardTerm").textContent = card.term;
+  document.getElementById("cardDef").textContent = card.def;
+  document.getElementById("cardBadge").textContent = card.tag;
+  document.getElementById("cardChapter").textContent = card.chapter;
+  document.getElementById("cardScene").classList.remove("flipped");
+  document.getElementById("actions").style.display = "none";
+  flipped = false;
+  updateStats();
+}
+
+function flipCard() {
+  if (!flipped) {
+    document.getElementById("cardScene").classList.add("flipped");
+    document.getElementById("actions").style.display = "flex";
+    flipped = true;
+  } else {
+    document.getElementById("cardScene").classList.remove("flipped");
+    // keep actions visible so Know It / Still Learning work from the front too
+    flipped = false;
+  }
+}
+
+function markCard(isKnown) {
+  const card = filteredDeck[idx];
+  if (isKnown) { known.add(card.term); again.delete(card.term); }
+  else { again.add(card.term); known.delete(card.term); }
+  idx++;
+  if (idx >= filteredDeck.length) showComplete(); else render();
+}
+
+function nextCard() { if (idx < filteredDeck.length - 1) { idx++; render(); } }
+function prevCard() { if (idx > 0) { idx--; render(); } }
+
+function updateStats() {
+  document.getElementById("statTotal").textContent = filteredDeck.length;
+  document.getElementById("statKnow").textContent = known.size;
+  document.getElementById("statAgain").textContent = again.size;
+  const pct = filteredDeck.length ? Math.round((known.size / filteredDeck.length) * 100) : 0;
+  document.getElementById("progressBar").style.width = pct + "%";
+}
+
+function showComplete() {
+  document.getElementById("cardScene").style.display = "none";
+  document.getElementById("actions").style.display = "none";
+  document.getElementById("complete").style.display = "block";
+  const stillCount = again.size;
+  document.getElementById("completeDetail").textContent =
+    "You marked " + known.size + " of " + filteredDeck.length + " cards as 'know it'."
+    + (stillCount > 0 ? " " + stillCount + " card" + (stillCount !== 1 ? "s" : "") + " still need work." : " Great job!");
+  document.getElementById("studyAgainBtn").style.display = stillCount > 0 ? "inline-block" : "none";
+  updateStats();
+}
+
+function restartDeck() {
+  known.clear(); again.clear(); idx = 0; flipped = false;
+  shuffle(filteredDeck);
+  document.getElementById("complete").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("actions").style.display = "none";
+  render();
+}
+
+function restartStillLearning() {
+  const stillTerms = new Set(again);
+  filteredDeck = filteredDeck.filter(c => stillTerms.has(c.term));
+  known.clear(); again.clear(); idx = 0; flipped = false;
+  shuffle(filteredDeck);
+  document.getElementById("complete").style.display = "none";
+  document.getElementById("cardScene").style.display = "block";
+  document.getElementById("actions").style.display = "none";
+  render();
+}
+
+/* ═══════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════ */
+function shuffle(arr) {
+  // crypto.getRandomValues for genuine randomness every call
+  const rnd = new Uint32Array(arr.length);
+  crypto.getRandomValues(rnd);
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = rnd[i] % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SUPABASE CONFIG
+════════════════════════════════════════════ */
+const SUPABASE_URL = "https://gkluvggtgbsoouapufym.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrbHV2Z2d0Z2Jzb291YXB1ZnltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzMwOTAsImV4cCI6MjA5NjM0OTA5MH0.Abb_-qg5on4C5-2IyQAJAdOkDZMD5kjwzllnVQwd75M";
+
+async function sbFetch(path, options = {}) {
+  const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json",
+      "Prefer": options.prefer || "",
+    },
+    ...options,
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+/* ═══════════════════════════════════════════
+   CUSTOM CARDS — Supabase persistence
+════════════════════════════════════════════ */
+async function loadCustomCards() {
+  try {
+    const rows = await sbFetch("custom_cards?select=*&order=created_at.asc");
+    rows.forEach(row => {
+      const ch = CHAPTERS.find(c => c.id === row.chapter_id);
+      if (ch) ch.cards.push({ term: row.term, def: row.def, tag: row.tag, custom: true, dbId: row.id });
+    });
+  } catch(e) {
+    console.error("Failed to load custom cards:", e);
+  }
+}
+
+async function deleteCustomCard(dbId, chId, term) {
+  try {
+    await sbFetch("custom_cards?id=eq." + dbId, { method: "DELETE" });
+    const ch = CHAPTERS.find(c => c.id === chId);
+    if (ch) ch.cards = ch.cards.filter(c => c.dbId !== dbId);
+    buildHome();
+  } catch(e) {
+    alert("Couldn't delete card: " + e.message);
+  }
+}
+
+function openCreateModal() {
+  const sel = document.getElementById("createChapter");
+  sel.innerHTML = CHAPTERS.filter(c => !c.coming).map(c =>
+    `<option value="${c.id}">${c.num} — ${c.title}</option>`
+  ).join("");
+  document.getElementById("createTerm").value = "";
+  document.getElementById("createDef").value = "";
+  document.getElementById("createTag").value = "";
+  document.getElementById("createError").style.display = "none";
+  document.getElementById("createModal").style.display = "flex";
+}
+
+function closeCreateModal() {
+  document.getElementById("createModal").style.display = "none";
+}
+
+async function saveNewCard() {
+  const chId = document.getElementById("createChapter").value;
+  const term = document.getElementById("createTerm").value.trim();
+  const def  = document.getElementById("createDef").value.trim();
+  const tag  = document.getElementById("createTag").value.trim() || "Custom";
+  const errEl = document.getElementById("createError");
+  const saveBtn = document.querySelector("#createModal button[onclick='saveNewCard()']");
+
+  if (!term || !def) {
+    errEl.textContent = "Please fill in both the term and definition.";
+    errEl.style.display = "block";
+    return;
+  }
+  errEl.style.display = "none";
+  saveBtn.textContent = "Saving…";
+  saveBtn.disabled = true;
+
+  try {
+    const rows = await sbFetch("custom_cards", {
+      method: "POST",
+      prefer: "return=representation",
+      body: JSON.stringify({ chapter_id: chId, term, def, tag }),
+    });
+    const saved = rows[0];
+    const ch = CHAPTERS.find(c => c.id === chId);
+    if (ch) ch.cards.push({ term, def, tag, custom: true, dbId: saved.id });
+    closeCreateModal();
+    buildHome();
+  } catch(e) {
+    errEl.textContent = "Error saving: " + e.message;
+    errEl.style.display = "block";
+  } finally {
+    saveBtn.textContent = "Add card";
+    saveBtn.disabled = false;
+  }
+}
+
+// Close modal on backdrop click
+document.getElementById("createModal").addEventListener("click", function(e) {
+  if (e.target === this) closeCreateModal();
+});
+
+/* ═══════════════════════════════════════════
+   CUSTOM CARDS LIST (home screen)
+════════════════════════════════════════════ */
+function buildCustomList() {
+  const container = document.getElementById("customCardsList");
+  const allCustom = CHAPTERS.flatMap(ch =>
+    ch.cards.filter(c => c.custom).map(c => ({ ...c, chId: ch.id, chNum: ch.num }))
+  );
+  if (!allCustom.length) {
+    container.innerHTML = "";
+    document.getElementById("customCardsSection").style.display = "none";
+    return;
+  }
+  document.getElementById("customCardsSection").style.display = "block";
+  container.innerHTML = allCustom.map(c => `
+    <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:0.5px solid var(--border);">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:13px; font-weight:500; color:var(--text);">${escHtml(c.term)}</div>
+        <div style="font-size:12px; color:var(--text2); margin-top:2px; line-height:1.4;">${escHtml(c.def)}</div>
+        <div style="font-size:11px; color:var(--text3); margin-top:3px;">${escHtml(c.chNum)} &middot; ${escHtml(c.tag)}</div>
+      </div>
+      <button onclick="deleteCustomCard('${escHtml(c.dbId)}', '${escHtml(c.chId)}', '${escHtml(c.term)}')"
+        style="flex-shrink:0; background:none; border:none; cursor:pointer; color:var(--text3); font-size:16px; padding:2px 4px; line-height:1;"
+        title="Delete card">&times;</button>
+    </div>
+  `).join("");
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// Patch buildHome to also rebuild custom list
+const _origBuildHome = buildHome;
+buildHome = function() { _origBuildHome(); buildCustomList(); };
+
+/* init */
+loadCustomCards().then(() => buildHome());
+</script>
+</body>
+</html>
